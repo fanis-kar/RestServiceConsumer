@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using RestServiceConsumer.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace RestServiceConsumer
 {
@@ -13,28 +15,29 @@ namespace RestServiceConsumer
     {
         static void Main()
         {
-            var jsonResult = GetData().Result;
-            var users = JsonConvert.DeserializeObject<List<Models.users>>(jsonResult);
+            var userRepository = new UserRepository();
+            var users = userRepository.GetData().Result;
 
-            Console.WriteLine(users[0].email);
-            Console.ReadKey();
-        }
-
-        static async Task<string> GetData()
-        {
-            var url = "https://jsonplaceholder.typicode.com/users";
-
-            using (var client = new HttpClient())
+            foreach(var user in users)
             {
-                client.BaseAddress = new Uri(url);
-                HttpResponseMessage response = await client.GetAsync(url);
+                var db = new Models.DBTestEntities();
 
-                if (!response.IsSuccessStatusCode)
-                    return null;
+                var tmpUser = new Models.users() {
+                    id = user.id,
+                    name = user.name,
+                    username = user.username,
+                    email = user.email,
+                    phone = user.phone,
+                    website = user.website
+                };
 
-                string strResult = await response.Content.ReadAsStringAsync();
-                return strResult;
+                db.users.Add(tmpUser);
+                //db.SaveChanges();
+
+                Console.WriteLine(user.id + " " + user.username);
             }
+
+            Console.ReadKey();
         }
     }
 }
