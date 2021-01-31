@@ -17,26 +17,9 @@ namespace RestServiceConsumer
         {
             var userRepository = new UserRepository();
             var users = userRepository.GetData().Result;
+            int rowsAffected = userRepository.UpdateData(users);
 
-            foreach(var user in users)
-            {
-                var db = new Models.DBTestEntities();
-
-                var tmpUser = new Models.users() {
-                    id = user.id,
-                    name = user.name,
-                    username = user.username,
-                    email = user.email,
-                    phone = user.phone,
-                    website = user.website
-                };
-
-                db.users.Add(tmpUser);
-                //db.SaveChanges();
-
-                Console.WriteLine(user.id + " " + user.username);
-            }
-
+            Console.WriteLine($"{rowsAffected} rows affected.");
             Console.ReadKey();
         }
     }

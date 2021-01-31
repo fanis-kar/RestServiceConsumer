@@ -28,17 +28,57 @@ namespace RestServiceConsumer.Infrastructure
             string jsonResult = await response.Content.ReadAsStringAsync();
             var users = JsonConvert.DeserializeObject<List<users>>(jsonResult);
 
+            //=======================
+
+            using (var db = new DBTestEntities())
+            {
+                foreach (var user in users)
+                {
+                    var tmpUser = new users()
+                    {
+                        id = user.id,
+                        name = user.name,
+                        username = user.username,
+                        email = user.email,
+                        phone = user.phone,
+                        website = user.website
+                    };
+
+                    db.users.Add(tmpUser);
+                    //db.SaveChanges();                  
+                }
+            }
+            var x = GetToken();
+            Console.WriteLine(x);
+            //=======================
+
+
             return users;
         }
 
-        public users GetUser(int id)
+        public int UpdateData(List<users> usersAPI)
         {
-            throw new NotImplementedException();
+            using (var db = new DBTestEntities())
+            {
+                foreach (var userAPI in usersAPI)
+                {
+                    var usersInDB = db.users.Where(u => u.id == userAPI.id).ToList();
+                    usersInDB.ForEach(u => {
+                        u.name = userAPI.name;
+                        u.username = userAPI.username;
+                        u.email = userAPI.email;
+                        u.phone = userAPI.phone;
+                        u.website = userAPI.website;
+                    });
+                }
+
+                return db.SaveChanges();
+            }
         }
 
-        public void UpdateUser(users user)
+        private static string GetToken()
         {
-            throw new NotImplementedException();
+            return "abcdefg";
         }
     }
 }
